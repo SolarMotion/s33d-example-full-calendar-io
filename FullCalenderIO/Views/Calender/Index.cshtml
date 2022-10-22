@@ -1,0 +1,77 @@
+﻿@using FullCalenderIO.Models;
+@model CalendarIndexViewModel
+
+<h2>Calender</h2>
+<div id='calendar'></div>
+
+<!--Popup-->
+<div class="modal fade" id="popupItem">
+    <div class="modal-dialog" style="width: 90%;">
+        <div class="modal-content">
+            <div id="popupHeader" class="modal-header">
+                <h4 class="modal-title">Holiday Create</h4>
+            </div>
+            <div id="popupBody" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" type="text/css" href="~/Content/fullcalendar-3.8.0.min.css">
+    <script type="text/javascript" src="~/Scripts/moment-2.20.1.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/fullcalendar-3.8.0.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev, next, today',
+                    center: 'title',
+                    right: '' //'month,agendaWeek,agendaDay'
+                },
+                defaultDate: '@Model.DefaultDT',
+                navLinks: true, // can click day/week names to navigate views
+                eventClick: function(calEvent, jsEvent, view) {
+
+                    var editHeader = '<h4 class="modal-title">Update</h4>';
+                    $("#popupHeader").html(editHeader);
+
+                    $.get('@Url.Action("HolidayDetails", "Calender")', {holidayID: 999, date: selectedDate}, function (partialView) {
+                        $("#popupBody").html(partialView);
+                    });
+
+                    $("#popupItem").modal('show');
+
+                    //alert('Event: ' + calEvent.title);
+                    //alert('ID: ' + calEvent.id);
+
+                    //alert('View: ' + view.name);
+
+                },
+                eventLimit: true, // allow "more" link when too many events
+                events: @Html.Raw(Json.Encode(Model.CalendarItems)),
+                dayClick: function(date, jsEvent, view) {
+                    var selectedDate = moment(date).format("YYYYMMDD");
+
+                    var editHeader = '<h4 class="modal-title">Create</h4>';
+                    $("#popupHeader").html(editHeader);
+
+                    $.get('@Url.Action("HolidayDetails", "Calender")', {holidayID: 999, date: selectedDate}, function (partialView) {
+                        $("#popupBody").html(partialView);
+                    });
+
+                    $("#popupItem").modal('show');
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    #calendar {
+        /*max-width: 90%;*/
+        margin: 0 auto;
+    }
+</style>
